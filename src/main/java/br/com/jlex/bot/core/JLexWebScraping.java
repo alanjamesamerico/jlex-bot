@@ -24,17 +24,29 @@ public class JLexWebScraping {
 	private	static final String 	URL_SCRAPING 	= "https://www.dicio.com.br/";
 	private static final String		URL_IMAGE 		= "https://s.dicio.com.br/";
 	private static final String		IMG_JPG			= ".jpg";
-	public 	static final UserAgent 	scraping 		= new UserAgent();
+	public 	static UserAgent 	scraping;
 	
     public JLexWebScraping() {
 	}
     
-    @SuppressWarnings("static-access")
+	@SuppressWarnings("static-access")
 	public JLexWebScraping(String word) throws ResponseException {
-    	this.word = word;
-    	scraping.visit(URL_SCRAPING + word);
+		this.word = word;
+    	scraping = new UserAgent();
+		scraping.visit(URL_SCRAPING + word);
 	}
     
+	public static String getTag(String word) throws ResponseException, NotFound{
+		scraping = new UserAgent();
+		scraping.visit(URL_SCRAPING + word);
+		System.out.println(URL_SCRAPING);
+		return scraping.doc.findFirst(TagCommands.h1).getText();
+	}
+	
+	public static String getTest(){
+		return "Test Scraping static";
+	}
+	
 	@SuppressWarnings("static-access")
 	public String getWordSearch() throws NotFound {
 		return this.scraping.doc.findFirst(TagCommands.h1).getText();
@@ -59,7 +71,7 @@ public class JLexWebScraping {
 		return URL_SCRAPING;
 	}
 	
-	public String getBaseUrlImage() {
+	public static String getBaseUrlImage() {
 		return URL_IMAGE + word + IMG_JPG;
 	}
 	

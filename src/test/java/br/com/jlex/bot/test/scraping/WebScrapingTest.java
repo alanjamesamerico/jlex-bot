@@ -28,13 +28,13 @@ public class WebScrapingTest {
 			
 			String word = dicioScraping.getWordSearch();
 			String significance = dicioScraping.getSignificance();
-			List<String> descriptions = dicioScraping.getDescription();
-			
+//			List<String> descriptions = dicioScraping.getDescription();
+//			
 			System.out.println(word + "\n" + significance);
-			
-			for (String text : descriptions) {
-				System.out.println(text);
-			}
+//			
+//			for (String text : descriptions) {
+//				System.out.println(text);
+//			}
 		} catch (Exception e) {
 			System.err.println(e);
 		}

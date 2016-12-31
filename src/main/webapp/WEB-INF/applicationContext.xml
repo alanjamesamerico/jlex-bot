@@ -21,7 +21,8 @@
 	<context:annotation-config/>
 	<mvc:annotation-driven />
 	<tx:annotation-driven transaction-manager="transactionManager" />
-
+	
+<!--# BEANS #-->
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/" /> <!-- /WEB-INF/views/ -->
@@ -32,94 +33,33 @@
     	<property name="maxUploadSize" value="250000"/>
 	</bean>
 	<mvc:view-controller path="/" view-name="index"/>
-
-<!--# QUARTZ SCHEDULER #-->
-    <bean id="quartzTest"
+	
+	 <!--# QUARTZ SCHEDULER #
+    <bean id="jlexJob"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="jlexService"/>
-        <property name="targetMethod" value="initGetMessagesSenders"/>
-        <property name="concurrent" value="false" />
+		<property name="targetObject" 	ref="${job.class}" />
+        <property name="targetMethod" 	value="initGetMessagesSenders" />
+        <property name="concurrent" 	value="false" />
 	</bean>
-	<bean id="triggerTest" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
-        <property name="jobDetail" ref="quartzTest"/>
-        <property name="startDelay" value="10000"/>
-        <property name="repeatInterval" value="90000"/>
+	<bean id="jlexTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" 			ref="jlexJob" />
+        <property name="startDelay" 		value="${tgg.daley}" />
+        <property name="repeatInterval" 	value="${tgg.repeat}" />
 	</bean>
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="false">      
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">    
+        <property name="configLocation" value="classpath:quartz.properties" />
+        <property name="triggers">
+            <list>
+                <ref bean="jlexTrigger"/> 
+            </list>
+        </property>
         <property name="quartzProperties">
         	<props>
         		<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
 	        	<prop key="org.quartz.threadPool.threadCount">1</prop>
 	        </props>
-        </property>
-        <property name="triggers">
-            <list>
-                <ref bean="triggerTest"/> 
-            </list>
         </property>
         <property name="waitForJobsToCompleteOnShutdown" value="true" />
-    </bean>
-    
-    <!--  
-	<bean name="complexJobDetail"    class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-	    <property name="jobClass" value="br.com.jlex.bot.services.JLexService" />
-	    <property name="jobDataMap">
-	        <map>
-	            <entry key="telegramApi" value-ref="jlexService" />
-	        </map>
-	    </property>
-	    <property name="durability" value="true" />
-	</bean>
-	<bean id="cronTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-	    <property name="jobDetail" ref="complexJobDetail" />
-	    <property name="cronExpression" value="0/9 * * * * ?" />
-	</bean>
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">      
-        <property name="triggers">
-            <list>
-                <ref bean="cronTrigger"/>
-            </list>
-        </property>
-        <property name="quartzProperties">
-        	<props>
-        		<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
-	        	<prop key="org.quartz.threadPool.threadCount">1</prop>
-	        </props>
-        </property>
     </bean> -->
 	
-	
-<!--# DATASOURCE - Connection with data base #
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location">
-			<value>classpath:database.properties</value>
-		</property>
-	</bean>
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="${pg.driver}" />
-		<property name="url" value="${pg.url}" />
-		<property name="username" value="${pg.username}" />
-		<property name="password" value="${pg.password}" />
-	</bean>-->
-	
-<!--# SESSION FACTORY - Configuration for Hibernate #
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-		<property name="packagesToScan" value="br.com.lab.app.model" />
-		<property name="annotatedPackages" value="br.com.lab.app.model" />
-		<property name="hibernateProperties">
-			<props>
-				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
- 				<prop key="hibernate.hbm2ddl.auto">create</prop>
-				<prop key="hibernate.format_sql">true</prop>
-				<prop key="hibernate.show_sql">true</prop>
-			</props>
-		</property>
-	</bean>-->
-	
-	
-<!--# TRANSACTION MANAGER #
-    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>-->
 </beans>

@@ -20,15 +20,15 @@ import br.com.jlex.bot.models.commands.JLexBotCommands;
 
 public class JLexTelegramBot extends TelegramLongPollingBot {
 	
-	private JLexWebScraping ws = new JLexWebScraping();
+	private JLexWebScraping ws;
 	
 	public void onUpdateReceived(Update update) {
 		System.out.println("\t> Receved..");
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			System.out.println("> Text: " + update.getMessage().getText());
 	        handleIncomingMessage(update.getMessage());
-	    } /*else {
-	    	SendMessage message = new SendMessage() 
+	    } else {
+	    	SendMessage message = new SendMessage()
 	    		.setChatId(update.getMessage().getChatId())
 	            .setText("Desculpe, não entendi o que você digitou.\n Por favor, digite novamente =)");
 			try {
@@ -36,7 +36,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} catch (TelegramApiException e) {
 				e.printStackTrace();
 			}
-	    }*/
+	    }
 	}
 	
 	public void handleIncomingMessage(Message message) {
@@ -54,6 +54,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		}
 	}
 	
+	@SuppressWarnings("static-access")
 	private void sendResponseSearch(Message message) throws TelegramApiException {
 		
 		if (isValideWordReceived(message)){

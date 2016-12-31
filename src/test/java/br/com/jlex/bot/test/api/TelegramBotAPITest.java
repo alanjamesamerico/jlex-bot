@@ -4,8 +4,7 @@ import org.junit.Test;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 
-import br.com.jlex.bot.core.JLexTelegramBot;
-import br.com.jlex.bot.services.JLexService;
+import br.com.jlex.bot.core.JLexTelegramBotDicio;
 
 public class TelegramBotAPITest {
 	
@@ -16,13 +15,14 @@ public class TelegramBotAPITest {
 			
 			ApiContextInitializer.init();
 			System.out.println("EM EXECUÇÃO...\n================\n");
-			new JLexService().initGetMessagesSenders();
-			new TelegramBotsApi().registerBot(new JLexTelegramBot());
+			
+//			new JLexService().initGetMessagesSenders();
+			new TelegramBotsApi().registerBot(new JLexTelegramBotDicio());
 			Thread.sleep(80000000);
+			
 			System.out.println("\n----\n\tFIM DA EXECUÇÃO!");
 			
 		} catch (Exception e) {
-			System.err.println(e);
 		}
 	}
 }

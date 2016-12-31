@@ -15,6 +15,10 @@ public class QuartzTest implements Serializable {
 	public QuartzTest() {
 		
 	}
+	
+	public static String testScraping() {
+		return "Test Scraping static";
+	}
 
 	public static void test() {
 		ApiContextInitializer.init();
@@ -22,7 +26,7 @@ public class QuartzTest implements Serializable {
 		try {
 			
 			synchronized (Thread.currentThread()) {
-				new TelegramBotsApi().registerBot(new JLexTelegramBotDicio());
+				new TelegramBotsApi().registerBot(new JLexTelegramBotDicio()); // Bot Test
 				System.out.println("[FIM GET UPDATE]");
 			}
 			

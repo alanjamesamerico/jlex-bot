@@ -6,6 +6,7 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.telegram.telegrambots.ApiContextInitializer;
 
 import br.com.jlex.bot.core.QuartzTest;
 
@@ -32,12 +33,14 @@ public abstract class JLexServiceAbstract extends QuartzJobBean implements Seria
 	
 	//@Scheduled(fixedDelay=5000)
 	public void initGetMessagesSenders() {
+		ApiContextInitializer.init();
 		try {
 			synchronized (this) {
 				System.out.println("[Thread] Name  - " + Thread.currentThread().getName());
 				System.out.println("[Thread] State - " + Thread.currentThread().getState());
 				
 				QuartzTest.test();
+//				System.out.println("testando...");
 				
 				System.out.println("# FIM TEST #");
 			}
