@@ -1,7 +1,8 @@
 package br.com.jlex.bot.test.scraping;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,29 +15,23 @@ import br.com.jlex.bot.core.JLexWebScraping;
 
 public class WebScrapingTest {
 	
-	private JLexWebScraping dicioScraping;
+	private JLexWebScraping ws;
 	
 	@Before
-	public void setup() throws ResponseException {
-		dicioScraping = new JLexWebScraping("amor");
+	public void setup() throws ResponseException, IOException {
+		ws = new JLexWebScraping("amor");
 	}
 	
 	@Test
-	public void structTest() {
+	public void testJsoup() throws IOException {
 		
-		try {
-			
-			String word = dicioScraping.getWordSearch();
-			String significance = dicioScraping.getSignificance();
-			List<String> descriptions = dicioScraping.getDescription();
-			
-			System.out.println(word + "\n" + significance);
-			
-			for (String text : descriptions) {
-				System.out.println(text);
-			}
-		} catch (Exception e) {
-			System.err.println(e);
+		String word = ws.getWordSearch();
+		String significance = ws.getSignificance();
+		System.out.println(word + "\n" + significance);
+		
+		ArrayList<String> contentSpans = (ArrayList<String>) ws.getDescription();
+		for (String s : contentSpans) {
+			System.out.println(s);
 		}
 	}
 	
@@ -64,10 +59,4 @@ public class WebScrapingTest {
 			  System.err.println(e);
 			}
 	}
-	
-//	@Test
-//	public void httpGetImageTest() throws IOException {
-//		BufferedImage img = JLexWebScraping.getImageWord("https://s.dicio.com.br/amor.jpg");
-//		ImageIO.write(img, "png", new File("C:/Users/Alan James/Desktop/amor.png"));
-//	}
 }

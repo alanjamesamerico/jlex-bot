@@ -22,7 +22,7 @@ public class QuartzTest implements Serializable {
 		try {
 			
 			synchronized (Thread.currentThread()) {
-				new TelegramBotsApi().registerBot(new JLexTelegramBotDicio());
+				new TelegramBotsApi().registerBot(new JLexTelegramBot());
 				System.out.println("[FIM GET UPDATE]");
 			}
 			

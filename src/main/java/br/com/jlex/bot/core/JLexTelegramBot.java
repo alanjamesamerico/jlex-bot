@@ -1,5 +1,6 @@
 package br.com.jlex.bot.core;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			System.out.println("> Text: " + update.getMessage().getText());
 	        handleIncomingMessage(update.getMessage());
-	    } /*else {
+	    } else {
 	    	SendMessage message = new SendMessage() 
 	    		.setChatId(update.getMessage().getChatId())
 	            .setText("Desculpe, não entendi o que você digitou.\n Por favor, digite novamente =)");
@@ -36,7 +37,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} catch (TelegramApiException e) {
 				e.printStackTrace();
 			}
-	    }*/
+	    }
 	}
 	
 	public void handleIncomingMessage(Message message) {
@@ -59,7 +60,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		if (isValideWordReceived(message)){
 			SendPhoto sendPhoto = new SendPhoto();
 			sendPhoto.setChatId(message.getChatId());
-			sendPhoto.setPhoto(ws.getBaseUrlImage());
+			sendPhoto.setPhoto(ws.getUrlImage());
 			
 			try {
 				
@@ -75,7 +76,6 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
 			try {
 				
 				SendMessage response = generateResponseMessage(ws, message);
@@ -90,6 +90,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 	private boolean isValideWordReceived(Message message){
 		
 		try {
+			
 			ws = new JLexWebScraping(StringUtils.lowerCase(message.getText()));
 			String word = ws.getWordSearch();
 			
@@ -98,12 +99,8 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} else {
 				responseWordNotFound(message);
 			}
-		} catch (ResponseException e) {
-			responseWordNotFound(message);
-			return false;
-		} catch (NotFound e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
 		}
 		return false;
 	}
@@ -123,26 +120,18 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		
  		SendMessage response = new SendMessage();
 		String content = "";
+		response.setChatId(message.getChatId());
+		content = ws.getWordSearch() +"\n---\n\n"+ 
+				ws.getSignificance() + "\n";
 		
-		try {
-			
-			response.setChatId(message.getChatId());
-			content = ws.getWordSearch() +"\n---\n\n"+ 
-					  ws.getSignificance() + "\n";
-			
-			List<String> descriptions = ws.getDescription();
-			if (!descriptions.isEmpty()) {
-				for (String description : descriptions) {
-					content = content + "> " + description +"\n\n";
-				}
-				response.setText(content);
-			} else {
-				responseWordNotFound(message);
+		List<String> descriptions = ws.getDescription();
+		if (!descriptions.isEmpty()) {
+			for (String description : descriptions) {
+				content = content + "> " + description +"\n\n";
 			}
-		} catch (NotFound e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			response.setText(content);
+		} else {
+			responseWordNotFound(message);
 		}
 		
 		return response;
