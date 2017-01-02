@@ -1,6 +1,7 @@
 package br.com.jlex.bot.core;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.text.Normalizer;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,16 +12,13 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import com.jaunt.NotFound;
-import com.jaunt.ResponseException;
-
 import br.com.jlex.bot.models.MessageBot;
 import br.com.jlex.bot.models.commands.Commands;
 import br.com.jlex.bot.models.commands.JLexBotCommands;
 
 public class JLexTelegramBot extends TelegramLongPollingBot {
 	
-	private JLexWebScraping ws;
+	private JLexWebScraping ws = new JLexWebScraping();
 	
 	public void onUpdateReceived(Update update) {
 		System.out.println("\t> Receved..");
@@ -28,7 +26,7 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			System.out.println("> Text: " + update.getMessage().getText());
 	        handleIncomingMessage(update.getMessage());
 	    } else {
-	    	SendMessage message = new SendMessage()
+	    	SendMessage message = new SendMessage() 
 	    		.setChatId(update.getMessage().getChatId())
 	            .setText("Desculpe, não entendi o que você digitou.\n Por favor, digite novamente =)");
 			try {
@@ -54,13 +52,12 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		}
 	}
 	
-	@SuppressWarnings("static-access")
 	private void sendResponseSearch(Message message) throws TelegramApiException {
 		
 		if (isValideWordReceived(message)){
 			SendPhoto sendPhoto = new SendPhoto();
 			sendPhoto.setChatId(message.getChatId());
-			sendPhoto.setPhoto(ws.getBaseUrlImage());
+			sendPhoto.setPhoto(ws.getUrlImage());
 			
 			try {
 				
@@ -76,7 +73,6 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
 			try {
 				
 				SendMessage response = generateResponseMessage(ws, message);
@@ -85,13 +81,38 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} catch (TelegramApiException e) {
 				e.printStackTrace();
 			}
+		} else {
+			// TODO IMPLEMENTAR Texto enviado inválido
 		}
+	}
+	
+	private String removeAcsents(String text) {
+	    return Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+	} // TODO Implementar método static em outra class
+	
+	private String checkAndRemoveS(String text) {
+		String str = "";
+		boolean ContainsS = StringUtils.contains(StringUtils.substring(text, text.length()-1), "s");
+		if (ContainsS) {
+			str = StringUtils.removeEnd(text, "s");
+		} else {
+			return text;
+		}
+		return str;
+	}// TODO Implementar método static em outra class
+	
+	private String normalizeMessageText(String text){
+		String textNormalized = "";
+		textNormalized = checkAndRemoveS(text);
+		textNormalized = removeAcsents(textNormalized);
+		return StringUtils.lowerCase(textNormalized);
 	}
 	
 	private boolean isValideWordReceived(Message message){
 		
 		try {
-			ws = new JLexWebScraping(StringUtils.lowerCase(message.getText()));
+			
+			ws = new JLexWebScraping(normalizeMessageText(message.getText()));
 			String word = ws.getWordSearch();
 			
 			if (!StringUtils.isEmpty(word)){ 
@@ -99,12 +120,8 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 			} else {
 				responseWordNotFound(message);
 			}
-		} catch (ResponseException e) {
-			responseWordNotFound(message);
-			return false;
-		} catch (NotFound e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
 		}
 		return false;
 	}
@@ -124,26 +141,17 @@ public class JLexTelegramBot extends TelegramLongPollingBot {
 		
  		SendMessage response = new SendMessage();
 		String content = "";
+		response.setChatId(message.getChatId());
+		content = ws.getWordSearch() +"\n---\n\n"+ ws.getSignificance() + "\n";
 		
-		try {
-			
-			response.setChatId(message.getChatId());
-			content = ws.getWordSearch() +"\n---\n\n"+ 
-					  ws.getSignificance() + "\n";
-			
-			List<String> descriptions = ws.getDescription();
-			if (!descriptions.isEmpty()) {
-				for (String description : descriptions) {
-					content = content + "> " + description +"\n\n";
-				}
-				response.setText(content);
-			} else {
-				responseWordNotFound(message);
+		List<String> descriptions = ws.getDescription();
+		if (!descriptions.isEmpty()) {
+			for (String description : descriptions) {
+				content = content + "> " + description +"\n\n";
 			}
-		} catch (NotFound e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			response.setText(content);
+		} else {
+			responseWordNotFound(message);
 		}
 		
 		return response;

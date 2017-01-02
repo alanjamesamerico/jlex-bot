@@ -7,8 +7,10 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 
-import br.com.jlex.bot.core.QuartzTest;
+import br.com.jlex.bot.core.JLexTelegramBot;
 
 @DisallowConcurrentExecution
 public abstract class JLexServiceAbstract extends QuartzJobBean implements Serializable {
@@ -17,36 +19,23 @@ public abstract class JLexServiceAbstract extends QuartzJobBean implements Seria
 
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+	}
+	
+	public void startBot() {
+		ApiContextInitializer.init();
 		try {
-			synchronized (Thread.currentThread()) {
-				System.out.println("[Thread] Name  - " + Thread.currentThread().getName());
-				System.out.println("[Thread] State - " + Thread.currentThread().getState());
-				
-				QuartzTest.test();
-				
-				System.out.println("# FIM TEST #");
-			}
-		} catch (Throwable  t) {
-			t.printStackTrace();
+			System.out.println("#################################"
+					+ "\n#\tBot Inicialized\t\t#\n"
+					+ "#################################");
+			new TelegramBotsApi().registerBot(new JLexTelegramBot()); // Registrando o JLex Bot
+		} catch (TelegramApiRequestException e) {
+			// TODO Criar uma Exception personalizada.
+			System.err.println("Erro ao iniciar o JLex Bot!");
+			e.printStackTrace();
 		}
 	}
 	
-	//@Scheduled(fixedDelay=5000)
-	public void initGetMessagesSenders() {
-		ApiContextInitializer.init();
-		try {
-			synchronized (this) {
-				System.out.println("[Thread] Name  - " + Thread.currentThread().getName());
-				System.out.println("[Thread] State - " + Thread.currentThread().getState());
-				
-				QuartzTest.test();
-//				System.out.println("testando...");
-				
-				System.out.println("# FIM TEST #");
-			}
-		} catch (Throwable  t) {
-			System.err.println("\t* ERROR INIT *");
-			t.printStackTrace();
-		}
+	public void stopBot() {
+		// TODO Implementar
 	}
 }
